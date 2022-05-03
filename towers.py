@@ -4,11 +4,13 @@ import pygame
 class Tower:
     def __init__(self, position, tile_size):
         self.position = position  # Top left tile
+        self.is_town_hall = False
 
 
 class TownHall(Tower):
     def __init__(self, position, tile_size):
         super().__init__(position, tile_size)
+        self.is_town_hall = True
         self.size = (5, 5)  # Size in tiles
         self.image = pygame.Surface((self.size[0] * tile_size, self.size[1] * tile_size))
         self.image.fill((255, 0, 0))

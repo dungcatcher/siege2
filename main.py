@@ -1,5 +1,6 @@
 import pygame
 from towers import TownHall
+from side_menu import SideMenu
 
 pygame.init()
 
@@ -23,23 +24,45 @@ def generate_map():
 
 
 def main():
+    towers = []
+
     clock = pygame.time.Clock()
     map_surface = generate_map()
-    shit_tower = TownHall((4, 4), TILE_SIZE)
+    map_rect = map_surface.get_rect(topleft=(0, 0))
+    side_menu = SideMenu((WIDTH, HEIGHT), map_surface.get_size())
+
+    left_click = False
+    town_hall_placed = False
 
     while True:
         clock.tick(60)
         WINDOW.fill((0, 0, 0))
-        WINDOW.blit(map_surface, (0, 0))
+        WINDOW.blit(map_surface, map_rect)
 
-        shit_tower.render(WINDOW)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
 
+        side_menu.render(WINDOW)
+
+        if not town_hall_placed:
+            if left_click:
+                if map_rect.collidepoint((mouse_x, mouse_y)):
+                    tile_position = (mouse_x // TILE_SIZE, mouse_y // TILE_SIZE)
+                    new_tower = TownHall(tile_position, TILE_SIZE)
+                    towers.append(new_tower)
+                    town_hall_placed = True
+
+        for tower in towers:
+            tower.render(WINDOW)
+
+        left_click = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                left_click = True
 
-        pygame.display.update()
+        pygame.display.flip()
 
 
 main()
