@@ -1,4 +1,5 @@
 import pygame
+from pygame import Vector2
 import math
 from astar_python.astar import Astar
 
@@ -30,7 +31,7 @@ class Enemy:
 
     def pathfind_tower(self, towers):
         closest_tower, closest_point = self.get_closest_tower(towers)
-        astar = Astar([[0 for x in range(36)] for y in range(36)])
+        astar = Astar([[0 for x in range(45)] for y in range(45)])
         path = astar.run(self.position, closest_point)
 
         return path
@@ -40,17 +41,14 @@ class Enemy:
             self.path = self.pathfind_tower(towers)
 
         if self.path:
-            diff_vector = [self.path[self.target_index][0] - self.position[0],
-                           self.path[self.target_index][1] - self.position[1]]
-            pixel_diff_vector = [self.path[self.target_index][0] * tile_size - self.pixel_position[0],
-                                 self.path[self.target_index][1] * tile_size - self.pixel_position[1]]
-            pixel_distance = math.hypot(pixel_diff_vector[0], pixel_diff_vector[1])
-            if pixel_distance <= self.speed:
-                if (self.target_index + 1) < len(self.path):
+            pixel_diff_vector = Vector2(self.path[self.target_index][0] * tile_size + tile_size / 2 - self.pixel_position[0],
+                                 self.path[self.target_index][1] * tile_size + tile_size / 2 - self.pixel_position[1])
+            pixel_distance_squared = pixel_diff_vector.length_squared()  # Ilmango efficient no square root
+            pixel_diff_vector.normalize_ip()
+            self.vel = pixel_diff_vector
+            if pixel_distance_squared <= self.speed * self.speed:
+                if (self.target_index + 1) < len(self.path) - 1:
                     self.target_index += 1
-                else:
-                    self.path = []
-            self.vel = diff_vector
         else:
             self.vel = [0, 0]
 
