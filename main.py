@@ -1,20 +1,20 @@
 import pygame
 from towers import TownHall
+from enemies import Enemy
 from side_menu import SideMenu
+import random
 
 pygame.init()
 
-WIDTH, HEIGHT = 900, 720
-TILE_SIZE = 15
-menu_width = HEIGHT
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
+WINDOW = pygame.display.set_mode((900, 720))
+ROWS, COLS = 45, 45
 
 
-def generate_map():
-    map_surface = pygame.Surface((menu_width, HEIGHT))
-    for x in range(map_surface.get_width() // TILE_SIZE):
-        for y in range(map_surface.get_height() // TILE_SIZE):
-            rect = pygame.Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+def generate_map(screen_size, tile_size):
+    map_surface = pygame.Surface((screen_size[1], screen_size[1]))
+    for x in range(map_surface.get_width() // tile_size):
+        for y in range(map_surface.get_height() // tile_size):
+            rect = pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
             if (x + y) % 2 == 0:
                 pygame.draw.rect(map_surface, (0, 255, 0), rect)
             else:
@@ -24,12 +24,15 @@ def generate_map():
 
 
 def main():
-    towers = []
-
     clock = pygame.time.Clock()
-    map_surface = generate_map()
+
+    tile_size = WINDOW.get_height() // ROWS
+    towers = []
+    enemies = [Enemy((15, 15), tile_size)]
+
+    map_surface = generate_map(WINDOW.get_size(), tile_size)
     map_rect = map_surface.get_rect(topleft=(0, 0))
-    side_menu = SideMenu((WIDTH, HEIGHT), map_surface.get_size())
+    side_menu = SideMenu(WINDOW.get_size(), map_surface.get_size())
 
     left_click = False
     town_hall_placed = False
@@ -46,13 +49,16 @@ def main():
         if not town_hall_placed:
             if left_click:
                 if map_rect.collidepoint((mouse_x, mouse_y)):
-                    tile_position = (mouse_x // TILE_SIZE, mouse_y // TILE_SIZE)
-                    new_tower = TownHall(tile_position, TILE_SIZE)
+                    tile_position = (mouse_x // tile_size, mouse_y // tile_size)
+                    new_tower = TownHall(tile_position, tile_size)
                     towers.append(new_tower)
                     town_hall_placed = True
 
         for tower in towers:
             tower.render(WINDOW)
+        for enemy in enemies:
+            enemy.update(tile_size, towers)
+            enemy.render(WINDOW, tile_size)
 
         left_click = False
         for event in pygame.event.get():
