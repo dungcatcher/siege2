@@ -32,9 +32,11 @@ class Enemy:
     def pathfind_tower(self, towers):
         closest_tower, closest_point = self.get_closest_tower(towers)
         astar = Astar([[0 for x in range(45)] for y in range(45)])
-        path = astar.run(self.position, closest_point)
-
-        return path
+        if self.position != closest_point:
+            path = astar.run(self.position, closest_point)
+            return path
+        else:
+            return []
 
     def update(self, tile_size, towers):
         if not self.path and towers:
@@ -47,7 +49,7 @@ class Enemy:
             pixel_diff_vector.normalize_ip()
             self.vel = pixel_diff_vector
             if pixel_distance_squared <= self.speed * self.speed:
-                if (self.target_index + 1) < len(self.path) - 1:
+                if (self.target_index + 1) < len(self.path):
                     self.target_index += 1
         else:
             self.vel = [0, 0]

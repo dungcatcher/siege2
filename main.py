@@ -28,11 +28,13 @@ def main():
 
     tile_size = WINDOW.get_height() // ROWS
     towers = []
-    enemies = [Enemy((15, 15), tile_size)]
+    enemies = [Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), tile_size)]
 
     map_surface = generate_map(WINDOW.get_size(), tile_size)
     map_rect = map_surface.get_rect(topleft=(0, 0))
-    side_menu = SideMenu(WINDOW.get_size(), map_surface.get_size())
+
+    money = 500
+    side_menu = SideMenu(WINDOW.get_size(), map_surface.get_size(), money)
 
     left_click = False
     town_hall_placed = False
@@ -45,6 +47,7 @@ def main():
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
         side_menu.render(WINDOW)
+        side_menu.update(left_click, (mouse_x, mouse_y))
 
         if not town_hall_placed:
             if left_click:
