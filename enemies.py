@@ -1,5 +1,4 @@
 import pygame
-import pygame.math
 import math
 from astar_python.astar import Astar
 
@@ -14,11 +13,11 @@ class Enemy:
         self.path = []
         self.vel = [0, 0]
         self.speed = 1
-        self.target_index = 0
+        self.target_index = 1
 
     def get_closest_tower(self, towers):
         current_closest_point, current_closest_tower = None, None
-        shortest_distance = 999999
+        shortest_distance = 9999999
         for tower in towers:
             for point in tower.positions_covered:
                 distance_to_point = math.hypot((self.position[0] - point[0]), (self.position[1] - point[1]))
@@ -43,8 +42,8 @@ class Enemy:
         if self.path:
             diff_vector = [self.path[self.target_index][0] - self.position[0],
                            self.path[self.target_index][1] - self.position[1]]
-            pixel_diff_vector = [self.path[self.target_index][0] * tile_size + tile_size // 2 - self.pixel_position[0],
-                                 self.path[self.target_index][1] * tile_size + tile_size // 2 - self.pixel_position[1]]
+            pixel_diff_vector = [self.path[self.target_index][0] * tile_size - self.pixel_position[0],
+                                 self.path[self.target_index][1] * tile_size - self.pixel_position[1]]
             pixel_distance = math.hypot(pixel_diff_vector[0], pixel_diff_vector[1])
             if pixel_distance <= self.speed:
                 if (self.target_index + 1) < len(self.path):
