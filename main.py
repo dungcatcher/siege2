@@ -1,5 +1,5 @@
 import pygame
-from towers import TownHall
+from towers import TownHall, name_to_class
 from enemies import Enemy
 from side_menu import SideMenu
 import random
@@ -23,55 +23,71 @@ def generate_map(screen_size, tile_size):
     return map_surface
 
 
-def main():
-    clock = pygame.time.Clock()
+class Game:
+    def __init__(self):
+        self.money = 500
+        self.tile_size = WINDOW.get_height() // ROWS
+        self.towers = []
+        self.enemies = [Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), self.tile_size)]
+        self.map_surface = generate_map(WINDOW.get_size(), self.tile_size)
+        self.map_rect = self.map_surface.get_rect(topleft=(0, 0))
+        self.side_menu = SideMenu(WINDOW.get_size(), self.map_surface.get_size())
+        self.town_hall_placed = False
+        self.left_click = False
+        self.mouse_position = [0, 0]
+        self.bought_tower = None
 
-    tile_size = WINDOW.get_height() // ROWS
-    towers = []
-    enemies = [Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), tile_size)]
+    def update(self):
+        self.left_click = False
+        self.mouse_position = pygame.mouse.get_pos()
 
-    map_surface = generate_map(WINDOW.get_size(), tile_size)
-    map_rect = map_surface.get_rect(topleft=(0, 0))
-
-    money = 500
-    side_menu = SideMenu(WINDOW.get_size(), map_surface.get_size(), money)
-
-    left_click = False
-    town_hall_placed = False
-
-    while True:
-        clock.tick(60)
-        WINDOW.fill((0, 0, 0))
-        WINDOW.blit(map_surface, map_rect)
-
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        side_menu.render(WINDOW)
-        side_menu.update(left_click, (mouse_x, mouse_y))
-
-        if not town_hall_placed:
-            if left_click:
-                if map_rect.collidepoint((mouse_x, mouse_y)):
-                    tile_position = (mouse_x // tile_size, mouse_y // tile_size)
-                    new_tower = TownHall(tile_position, tile_size)
-                    towers.append(new_tower)
-                    town_hall_placed = True
-
-        for tower in towers:
-            tower.render(WINDOW)
-        for enemy in enemies:
-            enemy.update(tile_size, towers)
-            enemy.render(WINDOW, tile_size)
-
-        left_click = False
         for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.left_click = True
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                left_click = True
+
+        self.side_menu.update(self)
+
+        if not self.town_hall_placed:
+            if self.left_click and self.map_rect.collidepoint(self.mouse_position):
+                tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
+                new_tower = TownHall(tile_position, self.tile_size)
+                self.towers.append(new_tower)
+                self.town_hall_placed = True
+        else:
+            if self.left_click and self.map_rect.collidepoint(self.mouse_position):
+                tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
+                new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
+                self.towers.append(new_tower)
+
+    def render(self, surface):
+        surface.fill((0, 0, 0))
+        surface.blit(self.map_surface, self.map_rect)
+        self.side_menu.render(surface)
+
+        for tower in self.towers:
+            tower.update(self.enemies)
+            tower.render(surface)
+        for enemy in self.enemies:
+            enemy.update(self.tile_size, self.towers)
+            enemy.render(surface, self.tile_size)
+
+
+def main():
+    clock = pygame.time.Clock()
+
+    game = Game()
+
+    while True:
+        clock.tick(60)
+
+        game.update()
+        game.render(WINDOW)
 
         pygame.display.flip()
 
 
-main()
+if __name__ == "__main__":
+    main()

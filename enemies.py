@@ -34,9 +34,9 @@ class Enemy:
         astar = Astar([[0 for x in range(45)] for y in range(45)])
         if self.position != closest_point:
             path = astar.run(self.position, closest_point)
-            return path
-        else:
-            return []
+            if path:
+                return path
+        return []
 
     def update(self, tile_size, towers):
         if not self.path and towers:
@@ -60,7 +60,7 @@ class Enemy:
         self.rect.center = self.pixel_position
 
     def render(self, surface, tile_size):
-        for point in self.path:
-            rect = pygame.Rect(point[0] * tile_size, point[1] * tile_size, tile_size, tile_size)
-            pygame.draw.rect(surface, (255, 200, 40), rect)
+        # for point in self.path:
+        #     rect = pygame.Rect(point[0] * tile_size, point[1] * tile_size, tile_size, tile_size)
+        #     pygame.draw.rect(surface, (255, 200, 40), rect)
         surface.blit(self.image, self.rect)
