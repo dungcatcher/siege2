@@ -9,6 +9,7 @@ class Tower(pygame.sprite.Sprite):
         super().__init__()
         self.position = position  # Top left tile
         self.is_town_hall = False
+        self.is_wall = False
         self.projectiles = []
 
     def get_closest_enemy(self, enemy_group):
@@ -56,16 +57,19 @@ class GunTower(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
+        self.original_cooldown = 40
+        self.cooldown = self.original_cooldown
 
     def update(self, sprite_groups):
-        closest_enemy = self.get_closest_enemy(sprite_groups["enemies"])
-        if closest_enemy:
-            vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
-            vector_to_enemy.normalize_ip()
-            sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
-
-        for projectile in self.projectiles:
-            projectile.update()
+        self.cooldown -= 1
+        if self.cooldown <= 0:
+            closest_enemy = self.get_closest_enemy(sprite_groups["enemies"])
+            if closest_enemy:
+                # Make a bullet
+                vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
+                vector_to_enemy.normalize_ip()
+                sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
+            self.cooldown = self.original_cooldown
 
 
 class Wall(Tower):

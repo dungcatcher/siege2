@@ -18,6 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.speed = 0.5
         self.target_index = 1
         self.health = 10
+        self.worth = 10
 
     def get_closest_tower(self, tower_group):
         current_closest_point, current_closest_tower = None, None

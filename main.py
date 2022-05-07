@@ -40,7 +40,7 @@ class Game:
             "enemies": pygame.sprite.Group(),
             "projectiles": pygame.sprite.Group()
         }
-        for i in range(50):
+        for i in range(10):
             self.sprite_groups["enemies"].add(Enemy((random.randint(0, COLS - 1), random.randint(0, ROWS - 1)), self.tile_size))
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
 
