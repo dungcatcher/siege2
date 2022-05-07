@@ -27,8 +27,6 @@ class Game:
     def __init__(self):
         self.money = 500
         self.tile_size = WINDOW.get_height() // ROWS
-        self.towers = []
-        self.enemies = [Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), self.tile_size)]
         self.map_surface = generate_map(WINDOW.get_size(), self.tile_size)
         self.map_rect = self.map_surface.get_rect(topleft=(0, 0))
         self.side_menu = SideMenu(WINDOW.get_size(), self.map_surface.get_size())
@@ -36,6 +34,11 @@ class Game:
         self.left_click = False
         self.mouse_position = [0, 0]
         self.bought_tower = None
+        self.sprite_groups = {
+            "towers": pygame.sprite.Group(),
+            "enemies": pygame.sprite.Group(Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), self.tile_size)),
+            "projectiles": pygame.sprite.Group()
+        }
 
     def update(self):
         self.left_click = False
@@ -48,31 +51,30 @@ class Game:
                 pygame.quit()
                 exit()
 
+        self.sprite_groups["towers"].update(self.sprite_groups)
+        self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups)
+        self.sprite_groups["projectiles"].update()
         self.side_menu.update(self)
 
         if not self.town_hall_placed:
             if self.left_click and self.map_rect.collidepoint(self.mouse_position):
                 tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
                 new_tower = TownHall(tile_position, self.tile_size)
-                self.towers.append(new_tower)
+                self.sprite_groups["towers"].add(new_tower)
                 self.town_hall_placed = True
         else:
             if self.left_click and self.map_rect.collidepoint(self.mouse_position):
                 tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
                 new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
-                self.towers.append(new_tower)
+                self.sprite_groups["towers"].add(new_tower)
 
     def render(self, surface):
         surface.fill((0, 0, 0))
         surface.blit(self.map_surface, self.map_rect)
+        self.sprite_groups["towers"].draw(surface)
+        self.sprite_groups["enemies"].draw(surface)
+        self.sprite_groups["projectiles"].draw(surface)
         self.side_menu.render(surface)
-
-        for tower in self.towers:
-            tower.update(self.enemies)
-            tower.render(surface)
-        for enemy in self.enemies:
-            enemy.update(self.tile_size, self.towers)
-            enemy.render(surface, self.tile_size)
 
 
 def main():

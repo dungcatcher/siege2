@@ -4,8 +4,9 @@ import math
 from astar_python.astar import Astar
 
 
-class Enemy:
+class Enemy(pygame.sprite.Sprite):
     def __init__(self, position, tile_size):
+        super().__init__()
         self.position = position  # Tile position
         self.pixel_position = [position[0] * tile_size + tile_size // 2, position[1] * tile_size + tile_size // 2]
         self.image = pygame.Surface((tile_size, tile_size))
@@ -15,11 +16,12 @@ class Enemy:
         self.vel = [0, 0]
         self.speed = 1
         self.target_index = 1
+        self.health = 10
 
-    def get_closest_tower(self, towers):
+    def get_closest_tower(self, tower_group):
         current_closest_point, current_closest_tower = None, None
         shortest_distance = 9999999
-        for tower in towers:
+        for tower in tower_group:
             for point in tower.positions_covered:
                 distance_to_point = math.hypot((self.position[0] - point[0]), (self.position[1] - point[1]))
                 if distance_to_point < shortest_distance:
@@ -29,8 +31,8 @@ class Enemy:
 
         return [current_closest_tower, current_closest_point]
 
-    def pathfind_tower(self, towers):
-        closest_tower, closest_point = self.get_closest_tower(towers)
+    def pathfind_tower(self, tower_group):
+        closest_tower, closest_point = self.get_closest_tower(tower_group)
         astar = Astar([[0 for x in range(45)] for y in range(45)])
         if self.position != closest_point:
             path = astar.run(self.position, closest_point)
@@ -38,9 +40,9 @@ class Enemy:
                 return path
         return []
 
-    def update(self, tile_size, towers):
-        if not self.path and towers:
-            self.path = self.pathfind_tower(towers)
+    def update(self, tile_size, sprite_groups):
+        if not self.path and sprite_groups["towers"]:
+            self.path = self.pathfind_tower(sprite_groups["towers"])
 
         if self.path:
             pixel_diff_vector = Vector2(self.path[self.target_index][0] * tile_size + tile_size / 2 - self.pixel_position[0],

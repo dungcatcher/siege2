@@ -4,16 +4,17 @@ from projectiles import Projectile
 from pygame import Vector2
 
 
-class Tower:
+class Tower(pygame.sprite.Sprite):
     def __init__(self, position, tile_size):
+        super().__init__()
         self.position = position  # Top left tile
         self.is_town_hall = False
         self.projectiles = []
 
-    def get_closest_enemy(self, enemies):
+    def get_closest_enemy(self, enemy_group):
         current_closest_point, current_closest_enemy = None, None
         shortest_distance = 9999999
-        for enemy in enemies:
+        for enemy in enemy_group:
             distance_to_point = math.hypot((self.rect.centerx - enemy.pixel_position[0]), (self.rect.centery - enemy.pixel_position[1]))
             if distance_to_point < shortest_distance:
                 shortest_distance = distance_to_point
@@ -31,13 +32,8 @@ class Tower:
 
         return positions
 
-    def update(self, enemies):
+    def update(self, sprite_groups):
         pass
-
-    def render(self, surface):
-        surface.blit(self.image, self.rect)
-        for projectile in self.projectiles:
-            surface.blit(projectile.image, projectile.rect)
 
 
 class TownHall(Tower):
@@ -60,11 +56,11 @@ class GunTower(Tower):
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
 
-    def update(self, enemies):
-        closest_enemy = self.get_closest_enemy(enemies)
+    def update(self, sprite_groups):
+        closest_enemy = self.get_closest_enemy(sprite_groups["enemies"])
         vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
         vector_to_enemy.normalize_ip()
-        self.projectiles.append(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
+        sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
 
         for projectile in self.projectiles:
             projectile.update()

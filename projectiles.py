@@ -2,8 +2,9 @@ import pygame
 import math
 
 
-class Projectile:
+class Projectile(pygame.sprite.Sprite):
     def __init__(self, pos, vel):
+        super().__init__()
         self.pos = pos
         self.vel = vel
         self.image = pygame.image.load('./Assets/bullet.png').convert_alpha()
@@ -13,6 +14,6 @@ class Projectile:
         self.speed = 5
 
     def update(self):
-        self.pos[0] += self.vel[0]
-        self.pos[1] += self.vel[1]
+        self.pos[0] += self.vel[0] * self.speed
+        self.pos[1] += self.vel[1] * self.speed
         self.rect.center = self.pos
