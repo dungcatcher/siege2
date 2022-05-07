@@ -66,6 +66,16 @@ class GunTower(Tower):
             projectile.update()
 
 
+class Wall(Tower):
+    def __init__(self, position, tile_size):
+        super().__init__(position, tile_size)
+        self.size = (1, 1)
+        self.image = pygame.Surface((self.size[0] * tile_size, self.size[1] * tile_size))
+        self.image.fill((0, 0, 0))
+        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.positions_covered = self.calculate_positions_covered()
+
+
 name_to_class = {
     "Gun Tower": GunTower
 }

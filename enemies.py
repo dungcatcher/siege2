@@ -2,6 +2,7 @@ import pygame
 from pygame import Vector2
 import math
 from astar_python.astar import Astar
+import time
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -31,18 +32,20 @@ class Enemy(pygame.sprite.Sprite):
 
         return [current_closest_tower, current_closest_point]
 
-    def pathfind_tower(self, tower_group):
+    def pathfind_tower(self, tower_group, obstructions):
         closest_tower, closest_point = self.get_closest_tower(tower_group)
-        astar = Astar([[0 for x in range(45)] for y in range(45)])
+        temp_obstructions = obstructions
+        temp_obstructions[closest_point[1]][closest_point[0]] = 0  # Sets the target point to a crossable square
+        astar = Astar(temp_obstructions)
         if self.position != closest_point:
             path = astar.run(self.position, closest_point)
             if path:
                 return path
         return []
 
-    def update(self, tile_size, sprite_groups):
+    def update(self, tile_size, sprite_groups, obstructions):
         if not self.path and sprite_groups["towers"]:
-            self.path = self.pathfind_tower(sprite_groups["towers"])
+            self.path = self.pathfind_tower(sprite_groups["towers"], obstructions)
 
         if self.path:
             pixel_diff_vector = Vector2(self.path[self.target_index][0] * tile_size + tile_size / 2 - self.pixel_position[0],
@@ -62,7 +65,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect.center = self.pixel_position
 
     def render(self, surface, tile_size):
-        # for point in self.path:
-        #     rect = pygame.Rect(point[0] * tile_size, point[1] * tile_size, tile_size, tile_size)
-        #     pygame.draw.rect(surface, (255, 200, 40), rect)
+        for point in self.path:
+            rect = pygame.Rect(point[0] * tile_size, point[1] * tile_size, tile_size, tile_size)
+            pygame.draw.rect(surface, (255, 200, 40), rect)
         surface.blit(self.image, self.rect)

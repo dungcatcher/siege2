@@ -11,7 +11,7 @@ class Projectile(pygame.sprite.Sprite):
         self.angle = math.atan2(self.vel[1], self.vel[0])
         self.image = pygame.transform.rotate(self.image, math.degrees(self.angle))
         self.rect = self.image.get_rect(center=self.pos)
-        self.speed = 5
+        self.speed = 15
 
     def update(self):
         self.pos[0] += self.vel[0] * self.speed

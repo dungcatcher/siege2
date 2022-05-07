@@ -3,6 +3,7 @@ from towers import TownHall, name_to_class
 from enemies import Enemy
 from side_menu import SideMenu
 import random
+import time
 
 pygame.init()
 
@@ -39,6 +40,12 @@ class Game:
             "enemies": pygame.sprite.Group(Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), self.tile_size)),
             "projectiles": pygame.sprite.Group()
         }
+        self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
+
+    def calculate_obstructions(self):
+        for tower in self.sprite_groups["towers"]:
+            for position_covered in tower.positions_covered:
+                self.obstructions[position_covered[1]][position_covered[0]] = None
 
     def update(self):
         self.left_click = False
@@ -52,7 +59,7 @@ class Game:
                 exit()
 
         self.sprite_groups["towers"].update(self.sprite_groups)
-        self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups)
+        self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups, self.obstructions)
         self.sprite_groups["projectiles"].update()
         self.side_menu.update(self)
 
@@ -62,11 +69,13 @@ class Game:
                 new_tower = TownHall(tile_position, self.tile_size)
                 self.sprite_groups["towers"].add(new_tower)
                 self.town_hall_placed = True
+                self.calculate_obstructions()
         else:
-            if self.left_click and self.map_rect.collidepoint(self.mouse_position):
+            if self.left_click and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
                 tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
                 new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
                 self.sprite_groups["towers"].add(new_tower)
+                self.calculate_obstructions()
 
     def render(self, surface):
         surface.fill((0, 0, 0))
