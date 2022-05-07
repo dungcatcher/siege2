@@ -58,9 +58,10 @@ class GunTower(Tower):
 
     def update(self, sprite_groups):
         closest_enemy = self.get_closest_enemy(sprite_groups["enemies"])
-        vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
-        vector_to_enemy.normalize_ip()
-        sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
+        if closest_enemy:
+            vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
+            vector_to_enemy.normalize_ip()
+            sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
 
         for projectile in self.projectiles:
             projectile.update()

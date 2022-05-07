@@ -60,7 +60,7 @@ class Game:
 
         self.sprite_groups["towers"].update(self.sprite_groups)
         self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups, self.obstructions)
-        self.sprite_groups["projectiles"].update()
+        self.sprite_groups["projectiles"].update(self.sprite_groups)
         self.side_menu.update(self)
 
         if not self.town_hall_placed:
