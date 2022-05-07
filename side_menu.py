@@ -44,8 +44,8 @@ class SideMenu:
         for item in self.items:
             if game.left_click and item.mouse_over(game.mouse_position) and game.town_hall_placed:
                 game.money -= 10
-                self.money = game.money
                 game.bought_tower = item
+        self.money = game.money
 
     def render(self, surface):
         pygame.draw.rect(surface, (30, 30, 70), self.rect)

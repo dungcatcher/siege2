@@ -15,7 +15,7 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=self.pixel_position)
         self.path = []
         self.vel = [0, 0]
-        self.speed = 1
+        self.speed = 0.5
         self.target_index = 1
         self.health = 10
 
@@ -54,14 +54,16 @@ class Enemy(pygame.sprite.Sprite):
             pixel_diff_vector.normalize_ip()
             self.vel = pixel_diff_vector
             if pixel_distance_squared <= self.speed * self.speed:
+                self.pixel_position = [self.path[self.target_index][0] * tile_size + tile_size / 2,
+                                       self.path[self.target_index][1] * tile_size + tile_size / 2]
                 if (self.target_index + 1) < len(self.path):
                     self.target_index += 1
         else:
             self.vel = [0, 0]
 
-        self.position = [self.pixel_position[0] // tile_size, self.pixel_position[1] // tile_size]
-        self.pixel_position[0] += self.vel[0]
-        self.pixel_position[1] += self.vel[1]
+        self.position = [int(self.pixel_position[0] // tile_size), int(self.pixel_position[1] // tile_size)]
+        self.pixel_position[0] += self.vel[0] * self.speed
+        self.pixel_position[1] += self.vel[1] * self.speed
         self.rect.center = self.pixel_position
 
     def render(self, surface, tile_size):

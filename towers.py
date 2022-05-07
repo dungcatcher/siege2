@@ -28,7 +28,8 @@ class Tower(pygame.sprite.Sprite):
         for x in range(self.size[0]):
             for y in range(self.size[1]):
                 new_position = (self.position[0] + x, self.position[1] + y)
-                positions.append(new_position)
+                if 0 <= new_position[0] < 45 and 0 <= new_position[1] < 45:
+                    positions.append(new_position)
 
         return positions
 

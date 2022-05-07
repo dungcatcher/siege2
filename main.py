@@ -37,9 +37,11 @@ class Game:
         self.bought_tower = None
         self.sprite_groups = {
             "towers": pygame.sprite.Group(),
-            "enemies": pygame.sprite.Group(Enemy((random.randint(0, COLS), random.randint(0, ROWS - 1)), self.tile_size)),
+            "enemies": pygame.sprite.Group(),
             "projectiles": pygame.sprite.Group()
         }
+        for i in range(50):
+            self.sprite_groups["enemies"].add(Enemy((random.randint(0, COLS - 1), random.randint(0, ROWS - 1)), self.tile_size))
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
 
     def calculate_obstructions(self):
@@ -60,7 +62,7 @@ class Game:
 
         self.sprite_groups["towers"].update(self.sprite_groups)
         self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups, self.obstructions)
-        self.sprite_groups["projectiles"].update(self.sprite_groups)
+        self.sprite_groups["projectiles"].update(self, self.sprite_groups)
         self.side_menu.update(self)
 
         if not self.town_hall_placed:
