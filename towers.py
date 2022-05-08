@@ -49,6 +49,7 @@ class TownHall(Tower):
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
         self.health = 100
+        self.price = 0
 
 
 class GunTower(Tower):
@@ -59,9 +60,10 @@ class GunTower(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.original_cooldown = 40
+        self.original_cooldown = 60
         self.cooldown = self.original_cooldown
         self.health = 20
+        self.price = 225
 
     def update(self, sprite_groups):
         self.cooldown -= 1
@@ -85,6 +87,7 @@ class Wall(Tower):
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
         self.health = 100
+        self.price = 10
 
 
 name_to_class = {
