@@ -69,8 +69,9 @@ class Enemy(pygame.sprite.Sprite):
             tower.kill()
             self.closest_tower = None
             self.path = []
+            self.target_index = 1
             game.calculate_obstructions()
-            self.pathfind_tower(game.sprite_groups["towers"], game.obstructions)
+            self.path_searched = False
 
     def update(self, game):
         if not self.path_searched and game.sprite_groups["towers"]:
