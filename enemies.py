@@ -77,7 +77,8 @@ class Enemy(pygame.sprite.Sprite):
             pixel_diff_vector = Vector2(self.path[self.target_index][0] * game.tile_size + game.tile_size / 2 - self.pixel_position[0],
                                  self.path[self.target_index][1] * game.tile_size + game.tile_size / 2 - self.pixel_position[1])
             pixel_distance_squared = pixel_diff_vector.length_squared()  # Ilmango efficient no square root
-            pixel_diff_vector.normalize_ip()
+            if pixel_distance_squared != 0:
+                pixel_diff_vector.normalize_ip()
             self.vel = pixel_diff_vector
             if pixel_distance_squared <= self.speed * self.speed:
                 self.pixel_position = [self.path[self.target_index][0] * game.tile_size + game.tile_size / 2,

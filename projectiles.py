@@ -12,7 +12,7 @@ class Projectile(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.image, math.degrees(self.angle))
         self.rect = self.image.get_rect(center=self.pos)
         self.speed = 15
-        self.damage = 10
+        self.damage = 0.5
 
     def update(self, game, sprite_groups):
         self.pos[0] += self.vel[0] * self.speed
