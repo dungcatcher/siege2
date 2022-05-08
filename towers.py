@@ -84,7 +84,7 @@ class Wall(Tower):
         self.image.fill((0, 0, 0))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.health = 30
+        self.health = 100
 
 
 name_to_class = {

@@ -67,6 +67,8 @@ class Enemy(pygame.sprite.Sprite):
         if tower.health <= 0:
             game.sprite_groups["towers"].remove(tower)
             game.calculate_obstructions()
+            self.pathfind_tower(game.sprite_groups["towers"], game.obstructions)
+            print(self.path)
 
     def update(self, game):
         if not self.path_searched and game.sprite_groups["towers"]:
