@@ -35,12 +35,13 @@ class Game:
         self.left_click = False
         self.mouse_position = [0, 0]
         self.bought_tower = None
+        self.started = False
         self.sprite_groups = {
             "towers": pygame.sprite.Group(),
             "enemies": pygame.sprite.Group(),
             "projectiles": pygame.sprite.Group()
         }
-        for i in range(10):
+        for i in range(25):
             self.sprite_groups["enemies"].add(Enemy((random.randint(0, COLS - 1), random.randint(0, ROWS - 1)), self.tile_size))
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
 
@@ -56,12 +57,16 @@ class Game:
         for event in pygame.event.get():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.left_click = True
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    self.started = True
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
-        self.sprite_groups["towers"].update(self.sprite_groups)
-        self.sprite_groups["enemies"].update(self.tile_size, self.sprite_groups, self.obstructions)
+        if self.started:
+            self.sprite_groups["towers"].update(self.sprite_groups)
+            self.sprite_groups["enemies"].update(self)
         self.sprite_groups["projectiles"].update(self, self.sprite_groups)
         self.side_menu.update(self)
 

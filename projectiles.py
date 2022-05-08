@@ -12,7 +12,7 @@ class Projectile(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.image, math.degrees(self.angle))
         self.rect = self.image.get_rect(center=self.pos)
         self.speed = 15
-        self.damage = 10
+        self.damage = 1
 
     def update(self, game, sprite_groups):
         self.pos[0] += self.vel[0] * self.speed
@@ -22,7 +22,7 @@ class Projectile(pygame.sprite.Sprite):
         #  Check collisions with enemies and kill enemy and projectile
         enemy_collisions = pygame.sprite.spritecollide(self, sprite_groups["enemies"], dokill=False)
         if enemy_collisions:
-            self.kill()
+            sprite_groups["projectiles"].remove(self)
             for enemy in enemy_collisions:
                 enemy.health -= self.damage
                 if enemy.health <= 0:

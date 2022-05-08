@@ -11,6 +11,7 @@ class Tower(pygame.sprite.Sprite):
         self.is_town_hall = False
         self.is_wall = False
         self.projectiles = []
+        self.alive = True
 
     def get_closest_enemy(self, enemy_group):
         current_closest_point, current_closest_enemy = None, None
@@ -47,6 +48,7 @@ class TownHall(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
+        self.health = 100
 
 
 class GunTower(Tower):
@@ -59,6 +61,7 @@ class GunTower(Tower):
         self.positions_covered = self.calculate_positions_covered()
         self.original_cooldown = 40
         self.cooldown = self.original_cooldown
+        self.health = 20
 
     def update(self, sprite_groups):
         self.cooldown -= 1
@@ -75,6 +78,7 @@ class GunTower(Tower):
 class Wall(Tower):
     def __init__(self, position, tile_size):
         super().__init__(position, tile_size)
+        self.is_wall = True
         self.size = (1, 1)
         self.image = pygame.Surface((self.size[0] * tile_size, self.size[1] * tile_size))
         self.image.fill((0, 0, 0))
@@ -83,5 +87,6 @@ class Wall(Tower):
 
 
 name_to_class = {
-    "Gun Tower": GunTower
+    "Gun Tower": GunTower,
+    "Wall": Wall
 }

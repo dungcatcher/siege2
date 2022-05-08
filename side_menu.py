@@ -1,16 +1,25 @@
 import pygame
 import pygame.freetype
-from towers import GunTower
 
 pygame.freetype.init()
 
 bahnschrift = pygame.freetype.SysFont('bahnschrift', 16)
 
+name_to_image_name = {
+    "Gun Tower": "guntower",
+}
+
 
 class MenuItem:
-    def __init__(self, image, rect, name):
-        self.image = image
-        self.rect = rect
+    def __init__(self, pos, size, name):
+        if name != "Wall":
+            self.image = pygame.image.load(f'Assets/{name_to_image_name[name]}.png').convert_alpha()
+            self.image = pygame.transform.scale(self.image, (size, size))
+            self.rect = self.image.get_rect(center=(pos[0], pos[1]))
+        else:
+            self.image = pygame.Surface((size, size))
+            self.image.fill((255, 0, 0))
+            self.rect = self.image.get_rect(center=(pos[0], pos[1]))
         self.name = name
 
     def mouse_over(self, mouse_position):
@@ -27,16 +36,12 @@ class SideMenu:
         self.money = 500
 
     def create_items(self):
-        item_names = ["Gun Tower", "Gun Tower"]
+        item_names = ["Gun Tower", "Wall"]
         new_items = []
         for i, item_name in enumerate(item_names):
             x_pos = self.selection_rect.left + (i % 2 + 1) * (self.selection_rect.width // 3)
             y_pos = self.selection_rect.top + self.selection_rect.width // 3 + (i // 2)
-            if item_name == "Gun Tower":
-                image = pygame.image.load('Assets/guntower.png').convert_alpha()
-                image = pygame.transform.scale(image, (self.selection_rect.width * 0.25, self.selection_rect.width * 0.25))
-                rect = image.get_rect(center=(x_pos, y_pos))
-                new_items.append(MenuItem(image, rect, item_name))
+            new_items.append(MenuItem((x_pos, y_pos), self.selection_rect.width * 0.25, item_name))
 
         return new_items
 
