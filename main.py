@@ -3,7 +3,7 @@ from towers import TownHall, name_to_class
 from enemies import Enemy
 from side_menu import SideMenu
 import random
-import time
+import json
 
 pygame.init()
 
@@ -12,7 +12,7 @@ ROWS, COLS = 45, 45
 
 
 def generate_map(screen_size, tile_size):
-    map_surface = pygame.Surface((screen_size[1], screen_size[1]))
+    map_surface = pygame.Surface((screen_size[1], screen_size[1]), pygame.SRCALPHA)
     for x in range(map_surface.get_width() // tile_size):
         for y in range(map_surface.get_height() // tile_size):
             rect = pygame.Rect(x * tile_size, y * tile_size, tile_size, tile_size)
@@ -20,18 +20,36 @@ def generate_map(screen_size, tile_size):
                 pygame.draw.rect(map_surface, (0, 255, 0), rect)
             else:
                 pygame.draw.rect(map_surface, (30, 200, 30), rect)
+            if x == 0 or x == COLS - 1 or y == 0 or y == ROWS - 1:
+                pygame.draw.rect(map_surface, (60, 200, 60), rect)
 
     return map_surface
 
 
 class Game:
     def __init__(self):
-        self.money = 500
+        self.money = 1000
+        self.level = 0  # Not an index (subtract 1 to index)
+        self.levels = [
+          {"gap": 30, "amt": 20},
+          {"gap": 20, "amt": 50},
+          {"gap": 15, "amt": 70},
+          {"gap": 10, "amt": 100},
+          {"gap": 8, "amt": 150}
+        ]
+        self.original_levels = [
+          {"gap": 30, "amt": 20},
+          {"gap": 20, "amt": 50},
+          {"gap": 15, "amt": 70},
+          {"gap": 10, "amt": 100},
+          {"gap": 8, "amt": 150}
+        ]
         self.tile_size = WINDOW.get_height() // ROWS
         self.map_surface = generate_map(WINDOW.get_size(), self.tile_size)
         self.map_rect = self.map_surface.get_rect(topleft=(0, 0))
         self.side_menu = SideMenu(WINDOW.get_size(), self.map_surface.get_size())
         self.town_hall_placed = False
+        self.town_hall_destroyed = False
         self.left_click = False
         self.mouse_position = [0, 0]
         self.bought_tower = None
@@ -41,9 +59,28 @@ class Game:
             "enemies": pygame.sprite.Group(),
             "projectiles": pygame.sprite.Group()
         }
-        for i in range(25):
-            self.sprite_groups["enemies"].add(Enemy((random.randint(0, COLS - 1), random.randint(0, ROWS - 1)), self.tile_size))
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
+        self.enemy_spawnable_areas = self.calculate_enemy_spawnable_areas()
+
+    def calculate_enemy_spawnable_areas(self):
+        spawnable_areas = []
+        for x in range(COLS):
+            for y in range(ROWS):
+                if not (1 <= x < COLS - 1 and 1 <= y < ROWS - 1):
+                    spawnable_areas.append((x, y))
+
+        return spawnable_areas
+
+    def spawn_enemies(self):
+        if self.level != 0:
+            level_index = self.level - 1
+            self.levels[level_index]["gap"] -= 1
+            if self.levels[level_index]["gap"] <= 0:
+                self.levels[level_index]["amt"] -= 1
+                if self.levels[level_index]["amt"] > 0:
+                    new_enemy = Enemy(random.choice(self.enemy_spawnable_areas), self.tile_size)
+                    self.sprite_groups["enemies"].add(new_enemy)
+                    self.levels[level_index]["gap"] = self.original_levels[level_index]["gap"]
 
     def calculate_obstructions(self):
         for tower in self.sprite_groups["towers"]:
@@ -57,7 +94,7 @@ class Game:
                 positions_covered.append((tower.position[0] + x, tower.position[1] + y))
 
         for point in positions_covered:
-            if not (0 <= point[0] < COLS and 0 <= point[1] < ROWS):  # All points on the map
+            if not (1 <= point[0] < COLS - 1 and 1 <= point[1] < ROWS - 1):  # All points on the map
                 return False
             elif self.obstructions[point[1]][point[0]] is None:
                 return False
@@ -77,11 +114,16 @@ class Game:
                 pygame.quit()
                 exit()
 
-        if self.started:
-            self.sprite_groups["towers"].update(self.sprite_groups)
+        if self.started and not self.town_hall_destroyed:
+            self.level = 1
+            self.spawn_enemies()
+            self.sprite_groups["towers"].update(self, self.sprite_groups)
             self.sprite_groups["enemies"].update(self)
         self.sprite_groups["projectiles"].update(self, self.sprite_groups)
         self.side_menu.update(self)
+
+        if self.town_hall_destroyed:
+            print('you lose')
 
         if not self.town_hall_placed:
             if self.left_click and self.map_rect.collidepoint(self.mouse_position):

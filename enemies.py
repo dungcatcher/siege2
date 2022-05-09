@@ -2,7 +2,6 @@ import pygame
 from pygame import Vector2
 import math
 from astar_python.astar import Astar
-import time
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -26,6 +25,7 @@ class Enemy(pygame.sprite.Sprite):
         self.original_cooldown = 30
         self.cooldown = self.original_cooldown
         self.closest_tower = None
+        self.closest_tower_point = None
 
     def get_closest_tower(self, tower_group, search_walls=False):
         current_closest_point, current_closest_tower = None, None
@@ -44,22 +44,23 @@ class Enemy(pygame.sprite.Sprite):
     def pathfind_tower(self, tower_group, obstructions):
         closest_tower, closest_point = self.get_closest_tower(tower_group)
         self.closest_tower = closest_tower
+        self.closest_tower_point = closest_point
         temp_obstructions = obstructions
         temp_obstructions[closest_point[1]][closest_point[0]] = 0  # Sets the target point to a crossable square
         astar = Astar(temp_obstructions)
         if self.position != closest_point:
-            path = astar.run(self.position, closest_point)
-            if path is not None:
-                return path
-            else:  # Path could not be found, break walls to get through
-                clear_map = [[0 for x in range(45)] for y in range(45)]  # No obstructions
-                clear_astar = Astar(clear_map)
-                clear_path = clear_astar.run(self.position, closest_point)
-                for point in clear_path:
-                    for tower in tower_group:
-                        if [tower.position[0], tower.position[1]] == point and tower.is_wall:
-                            self.wall_obstructions.append(tower)
-                return clear_path
+            # path = astar.run(self.position, closest_point)
+            # if path is not None:
+            #     return path
+            # else:  # Path could not be found, break walls to get through
+            clear_map = [[0 for x in range(45)] for y in range(45)]  # No obstructions
+            clear_astar = Astar(clear_map)
+            clear_path = clear_astar.run(self.position, closest_point)
+            for point in clear_path:
+                for tower in tower_group:
+                    if [tower.position[0], tower.position[1]] == point and tower.is_wall:
+                        self.wall_obstructions.append(tower)
+            return clear_path
         return []
 
     def attack(self, tower, game):
@@ -72,6 +73,8 @@ class Enemy(pygame.sprite.Sprite):
             self.target_index = 1
             game.calculate_obstructions()
             self.path_searched = False
+            if tower.is_town_hall:
+                game.town_hall_destroyed = True
 
     def update(self, game):
         if not self.path_searched and game.sprite_groups["towers"]:
@@ -95,8 +98,8 @@ class Enemy(pygame.sprite.Sprite):
 
         #  Attack target tower when in range
         if self.closest_tower is not None:
-            pixel_diff_vector = Vector2(self.closest_tower.rect.centerx - self.rect.centerx,
-                                        self.closest_tower.rect.centery - self.rect.centery)
+            pixel_diff_vector = Vector2(self.closest_tower_point[0] * game.tile_size + game.tile_size // 2 - self.rect.centerx,
+                                        self.closest_tower_point[1] * game.tile_size + game.tile_size // 2 - self.rect.centery)
             pixel_distance_squared = pixel_diff_vector.length_squared()
             if pixel_distance_squared <= (self.range * self.range) * (game.tile_size * game.tile_size):
                 self.attack(self.closest_tower, game)
