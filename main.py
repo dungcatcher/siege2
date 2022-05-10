@@ -53,7 +53,9 @@ class Game:
         self.left_click = False
         self.mouse_position = [0, 0]
         self.bought_tower = None
-        self.started = False
+        self.round_started = False  # Set to true for one frame
+        self.round_over = True
+        self.finished_spawning = True
         self.sprite_groups = {
             "towers": pygame.sprite.Group(),
             "enemies": pygame.sprite.Group(),
@@ -81,6 +83,8 @@ class Game:
                     new_enemy = Enemy(random.choice(self.enemy_spawnable_areas), self.tile_size)
                     self.sprite_groups["enemies"].add(new_enemy)
                     self.levels[level_index]["gap"] = self.original_levels[level_index]["gap"]
+                else:
+                    self.finished_spawning = True
 
     def calculate_obstructions(self):
         for tower in self.sprite_groups["towers"]:
@@ -109,39 +113,50 @@ class Game:
                 self.left_click = True
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    self.started = True
+                    if self.town_hall_placed:
+                        self.round_started = True
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
 
-        if self.started and not self.town_hall_destroyed:
-            self.level = 1
+        if len(self.sprite_groups["enemies"]) == 0 and self.finished_spawning:
+            self.round_over = True
+
+        if self.round_started and not self.town_hall_destroyed:
+            self.level += 1
+            self.round_started = False
+            self.finished_spawning = False
+            self.round_over = False
+
+        if not self.finished_spawning:
             self.spawn_enemies()
-            self.sprite_groups["towers"].update(self, self.sprite_groups)
-            self.sprite_groups["enemies"].update(self)
+
+        self.sprite_groups["towers"].update(self, self.sprite_groups)
+        self.sprite_groups["enemies"].update(self)
         self.sprite_groups["projectiles"].update(self, self.sprite_groups)
         self.side_menu.update(self)
 
         if self.town_hall_destroyed:
             print('you lose')
 
-        if not self.town_hall_placed:
-            if self.left_click and self.map_rect.collidepoint(self.mouse_position):
-                tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
-                new_tower = TownHall(tile_position, self.tile_size)
-                if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
-                    self.sprite_groups["towers"].add(new_tower)
-                    self.town_hall_placed = True
-                    self.calculate_obstructions()
-                    self.money -= new_tower.price
-        else:
-            if self.left_click and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
-                tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
-                new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
-                if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
-                    self.sprite_groups["towers"].add(new_tower)
-                    self.calculate_obstructions()
-                    self.money -= new_tower.price
+        if self.round_over:
+            if not self.town_hall_placed:
+                if self.left_click and self.map_rect.collidepoint(self.mouse_position):
+                    tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
+                    new_tower = TownHall(tile_position, self.tile_size)
+                    if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
+                        self.sprite_groups["towers"].add(new_tower)
+                        self.town_hall_placed = True
+                        self.calculate_obstructions()
+                        self.money -= new_tower.price
+            else:
+                if self.left_click and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
+                    tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
+                    new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
+                    if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
+                        self.sprite_groups["towers"].add(new_tower)
+                        self.calculate_obstructions()
+                        self.money -= new_tower.price
 
     def render(self, surface):
         surface.fill((0, 0, 0))
@@ -149,7 +164,7 @@ class Game:
         self.sprite_groups["towers"].draw(surface)
         self.sprite_groups["enemies"].draw(surface)
         self.sprite_groups["projectiles"].draw(surface)
-        self.side_menu.render(surface)
+        self.side_menu.render(self, surface)
 
 
 def main():

@@ -33,7 +33,6 @@ class SideMenu:
         self.rect = pygame.Rect(map_size[0], 0, (screen_size[0] - map_size[0]), screen_size[1])
         self.selection_rect = pygame.Rect(self.rect.left, self.rect.height * 0.12, self.rect.width, self.rect.height * 0.88)
         self.items = self.create_items()
-        self.money = 500
 
     def create_items(self):
         item_names = ["Gun Tower", "Wall"]
@@ -49,14 +48,17 @@ class SideMenu:
         for item in self.items:
             if game.left_click and item.mouse_over(game.mouse_position) and game.town_hall_placed:
                 game.bought_tower = item
-        self.money = game.money
 
-    def render(self, surface):
+    def render(self, game, surface):
         pygame.draw.rect(surface, (30, 30, 70), self.rect)
 
-        money_surf, money_rect = bahnschrift.render(f'Money: {self.money}', (255, 255, 255))
+        money_surf, money_rect = bahnschrift.render(f'Money: {game.money}', (255, 255, 255))
         money_rect.center = (self.rect.centerx, self.rect.height * 0.05)
         surface.blit(money_surf, money_rect)
+
+        level_surf, level_rect = bahnschrift.render(f'Level: {game.level}', (255, 255, 255))
+        level_rect.center = (self.rect.centerx, self.rect.height * 0.95)
+        surface.blit(level_surf, level_rect)
 
         for item in self.items:
             surface.blit(item.image, item.rect)
