@@ -48,7 +48,7 @@ class TownHall(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.health = 1000
+        self.health = 100
         self.price = 0
 
 
@@ -62,7 +62,7 @@ class GunTower(Tower):
         self.positions_covered = self.calculate_positions_covered()
         self.original_cooldown = 60
         self.cooldown = self.original_cooldown
-        self.health = 20
+        self.health = 30
         self.price = 225
         self.range = 10
 
@@ -87,7 +87,7 @@ class Wall(Tower):
         self.image.fill((0, 0, 0))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.health = 1000
+        self.health = 20
         self.price = 10
 
 

@@ -60,6 +60,10 @@ class SideMenu:
         level_rect.center = (self.rect.centerx, self.rect.height * 0.95)
         surface.blit(level_surf, level_rect)
 
+        year_surf, year_rect = bahnschrift.render(f'Year: 4000BCE', (255, 255, 255))
+        year_rect.midbottom = (self.rect.centerx, level_rect.top - self.rect.height * 0.02)
+        surface.blit(year_surf, year_rect)
+
         for item in self.items:
             surface.blit(item.image, item.rect)
 

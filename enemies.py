@@ -5,12 +5,12 @@ from astar_python.astar import Astar
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, position, tile_size):
+    def __init__(self, position, game):
         super().__init__()
         self.position = position  # Tile position
-        self.pixel_position = [position[0] * tile_size + tile_size // 2, position[1] * tile_size + tile_size // 2]
-        self.image = pygame.Surface((tile_size, tile_size))
-        self.image.fill((0, 0, 255))
+        self.pixel_position = [position[0] * game.tile_size + game.tile_size // 2, position[1] * game.tile_size + game.tile_size // 2]
+        self.original_image = pygame.image.load('./Assets/caveman.png')
+        self.image = pygame.transform.smoothscale(self.original_image, (game.tile_size * 1.5, game.tile_size * 1.5))
         self.rect = self.image.get_rect(center=self.pixel_position)
         self.path = []
         self.wall_obstructions = []
@@ -64,17 +64,20 @@ class Enemy(pygame.sprite.Sprite):
         return []
 
     def attack(self, tower, game):
-        tower.health -= self.damage
-        if tower.health <= 0:
-            game.sprite_groups["towers"].remove(tower)
-            tower.kill()
-            self.closest_tower = None
-            self.path = []
-            self.target_index = 1
-            game.calculate_obstructions()
-            self.path_searched = False
-            if tower.is_town_hall:
-                game.town_hall_destroyed = True
+        self.cooldown -= 1
+        if self.cooldown <= 0:
+            self.cooldown = self.original_cooldown
+            tower.health -= self.damage
+            if tower.health <= 0:
+                game.sprite_groups["towers"].remove(tower)
+                tower.kill()
+                self.closest_tower = None
+                self.path = []
+                self.target_index = 1
+                game.calculate_obstructions()
+                self.path_searched = False
+                if tower.is_town_hall:
+                    game.town_hall_destroyed = True
 
     def update(self, game):
         if not self.path_searched and game.sprite_groups["towers"]:
@@ -93,6 +96,11 @@ class Enemy(pygame.sprite.Sprite):
                                        self.path[self.target_index][1] * game.tile_size + game.tile_size / 2]
                 if (self.target_index + 1) < len(self.path):
                     self.target_index += 1
+                    angle = math.degrees(math.atan2(-self.vel[1], self.vel[0]))
+                    self.image = pygame.transform.smoothscale(self.original_image, (game.tile_size * 1.5, game.tile_size * 1.5))
+                    self.image = pygame.transform.rotozoom(self.image, angle, 1)
+                    self.rect = self.image.get_rect(center=self.pixel_position)
+
         else:
             self.vel = [0, 0]
 

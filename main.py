@@ -80,7 +80,7 @@ class Game:
             if self.levels[level_index]["gap"] <= 0:
                 self.levels[level_index]["amt"] -= 1
                 if self.levels[level_index]["amt"] > 0:
-                    new_enemy = Enemy(random.choice(self.enemy_spawnable_areas), self.tile_size)
+                    new_enemy = Enemy(random.choice(self.enemy_spawnable_areas), self)
                     self.sprite_groups["enemies"].add(new_enemy)
                     self.levels[level_index]["gap"] = self.original_levels[level_index]["gap"]
                 else:
@@ -122,11 +122,14 @@ class Game:
         if len(self.sprite_groups["enemies"]) == 0 and self.finished_spawning:
             self.round_over = True
 
-        if self.round_started and not self.town_hall_destroyed:
-            self.level += 1
-            self.round_started = False
-            self.finished_spawning = False
-            self.round_over = False
+        if self.round_started and not self.town_hall_destroyed and self.round_over:
+            if self.level + 1 <= len(self.levels):
+                self.level += 1
+                self.round_started = False
+                self.finished_spawning = False
+                self.round_over = False
+            else:
+                print('you win')
 
         if not self.finished_spawning:
             self.spawn_enemies()
