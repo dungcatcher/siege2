@@ -7,6 +7,7 @@ bahnschrift = pygame.freetype.SysFont('bahnschrift', 16)
 
 name_to_image_name = {
     "Gun Tower": "guntower",
+    "Bomber": "bomber"
 }
 
 
@@ -35,11 +36,11 @@ class SideMenu:
         self.items = self.create_items()
 
     def create_items(self):
-        item_names = ["Gun Tower", "Wall"]
+        item_names = ["Gun Tower", "Wall", "Bomber"]
         new_items = []
         for i, item_name in enumerate(item_names):
             x_pos = self.selection_rect.left + (i % 2 + 1) * (self.selection_rect.width // 3)
-            y_pos = self.selection_rect.top + self.selection_rect.width // 3 + (i // 2)
+            y_pos = self.selection_rect.top + self.selection_rect.width // 3 * (i // 2)
             new_items.append(MenuItem((x_pos, y_pos), self.selection_rect.width * 0.25, item_name))
 
         return new_items

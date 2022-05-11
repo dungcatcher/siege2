@@ -15,6 +15,16 @@ class Projectile(pygame.sprite.Sprite):
         self.damage = 10
 
     def update(self, game, sprite_groups):
+        pass
+
+
+class Bullet(Projectile):
+    def __init__(self, pos, vel):
+        super().__init__(pos, vel)
+        self.speed = 15
+        self.damage = 10
+
+    def update(self, game, sprite_groups):
         self.pos[0] += self.vel[0] * self.speed
         self.pos[1] += self.vel[1] * self.speed
         self.rect.center = self.pos
@@ -31,4 +41,35 @@ class Projectile(pygame.sprite.Sprite):
 
         if not self.rect.colliderect(game.map_rect):
             self.kill()
-            print(len(sprite_groups["projectiles"]))
+
+
+class Bomb(Projectile):
+    def __init__(self, pos, vel):
+        super().__init__(pos, vel)
+        self.speed = 5
+        self.damage = 50
+        self.aoe = 3
+
+    def update(self, game, sprite_groups):
+        self.pos[0] += self.vel[0] * self.speed
+        self.pos[1] += self.vel[1] * self.speed
+        self.rect.center = self.pos
+
+        #  Check collisions with enemies and kill enemy and projectile
+        enemy_collisions = pygame.sprite.spritecollide(self, sprite_groups["enemies"], dokill=False)
+        if enemy_collisions:
+            sprite_groups["projectiles"].remove(self)
+            for enemy in game.sprite_groups["enemies"]:
+                distance = math.hypot(self.rect.x - enemy.rect.x, self.rect.y - enemy.rect.y)
+                if distance <= self.aoe * game.tile_size:
+                    tile_distance = distance / game.tile_size
+                    damage = self.damage * (tile_distance / self.aoe)
+                    enemy.health -= damage
+                    if enemy.health <= 0:
+                        enemy.kill()
+                        game.money += enemy.worth
+
+        if not self.rect.colliderect(game.map_rect):
+            self.kill()
+
+

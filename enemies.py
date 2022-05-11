@@ -9,7 +9,7 @@ class Enemy(pygame.sprite.Sprite):
         super().__init__()
         self.position = position  # Tile position
         self.pixel_position = [position[0] * game.tile_size + game.tile_size // 2, position[1] * game.tile_size + game.tile_size // 2]
-        self.original_image = pygame.image.load('./Assets/caveman.png')
+        self.original_image = pygame.image.load('./Assets/caveman.png').convert_alpha()
         self.image = pygame.transform.smoothscale(self.original_image, (game.tile_size * 1.5, game.tile_size * 1.5))
         self.rect = self.image.get_rect(center=self.pixel_position)
         self.path = []

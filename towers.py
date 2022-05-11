@@ -1,6 +1,6 @@
 import pygame
 import math
-from projectiles import Projectile
+from projectiles import Bullet, Bomb
 from pygame import Vector2
 
 
@@ -74,7 +74,7 @@ class GunTower(Tower):
                 vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
                 if vector_to_enemy.length_squared() < (self.range * self.range) * (game.tile_size * game.tile_size):
                     vector_to_enemy.normalize_ip()
-                    sprite_groups["projectiles"].add(Projectile([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
+                    sprite_groups["projectiles"].add(Bullet([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
             self.cooldown = self.original_cooldown
 
 
@@ -91,7 +91,34 @@ class Wall(Tower):
         self.price = 10
 
 
+class Bomber(Tower):
+    def __init__(self, position, tile_size):
+        super().__init__(position, tile_size)
+        self.size = (3, 3)
+        self.image = pygame.image.load('Assets/bomber.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
+        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.positions_covered = self.calculate_positions_covered()
+        self.original_cooldown = 80
+        self.cooldown = self.original_cooldown
+        self.health = 50
+        self.price = 300
+        self.range = 10
+
+    def update(self, game, sprite_groups):
+        self.cooldown -= 1
+        if self.cooldown <= 0:
+            closest_enemy = self.get_closest_enemy(sprite_groups["enemies"])
+            if closest_enemy:
+                vector_to_enemy = Vector2(closest_enemy.rect.centerx - self.rect.centerx, closest_enemy.rect.centery - self.rect.centery)
+                if vector_to_enemy.length_squared() < (self.range * self.range) * (game.tile_size * game.tile_size):
+                    vector_to_enemy.normalize_ip()
+                    sprite_groups["projectiles"].add(Bomb([self.rect.centerx, self.rect.centery], [vector_to_enemy[0], vector_to_enemy[1]]))
+            self.cooldown = self.original_cooldown
+
+
 name_to_class = {
     "Gun Tower": GunTower,
-    "Wall": Wall
+    "Wall": Wall,
+    "Bomber": Bomber
 }
