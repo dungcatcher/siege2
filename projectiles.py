@@ -47,7 +47,7 @@ class Bomb(Projectile):
     def __init__(self, pos, vel):
         super().__init__(pos, vel)
         self.speed = 5
-        self.damage = 50
+        self.damage = 25
         self.aoe = 3
 
     def update(self, game, sprite_groups):
@@ -63,7 +63,7 @@ class Bomb(Projectile):
                 distance = math.hypot(self.rect.x - enemy.rect.x, self.rect.y - enemy.rect.y)
                 if distance <= self.aoe * game.tile_size:
                     tile_distance = distance / game.tile_size
-                    damage = self.damage * (tile_distance / self.aoe)
+                    damage = self.damage * (1 - (tile_distance / self.aoe))
                     enemy.health -= damage
                     if enemy.health <= 0:
                         enemy.kill()
@@ -71,5 +71,3 @@ class Bomb(Projectile):
 
         if not self.rect.colliderect(game.map_rect):
             self.kill()
-
-
