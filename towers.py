@@ -2,6 +2,7 @@ import pygame
 import math
 from projectiles import Bullet, Bomb
 from pygame import Vector2
+from interpolate import colour_interpolate
 
 
 class Tower(pygame.sprite.Sprite):
@@ -14,7 +15,11 @@ class Tower(pygame.sprite.Sprite):
         self.alive = True
 
     def draw_health_bar(self, surface):
-        pass
+        if self.health != self.max_health:
+            health_rect = pygame.Rect(self.health_bar_rect.left, self.health_bar_rect.top,
+                                      (self.health / self.max_health) * self.health_bar_rect.width, self.health_bar_rect.height)
+            pygame.draw.rect(surface, colour_interpolate((0, 255, 0), (255, 0, 0), 1 - (self.health / self.max_health)), health_rect)
+            pygame.draw.rect(surface, (0, 0, 0), self.health_bar_rect, width=1)
 
     def get_closest_enemy(self, enemy_group):
         current_closest_point, current_closest_enemy = None, None
@@ -54,6 +59,8 @@ class TownHall(Tower):
         self.max_health = 100
         self.health = self.max_health
         self.price = 0
+        self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + 10)
 
 
 class GunTower(Tower):
@@ -64,12 +71,14 @@ class GunTower(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.original_cooldown = 5
+        self.original_cooldown = 60
         self.cooldown = self.original_cooldown
         self.max_health = 30
         self.health = self.max_health
         self.price = 225
         self.range = 10
+        self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + 10)
 
     def update(self, game, sprite_groups):
         self.cooldown -= 1
@@ -92,8 +101,11 @@ class Wall(Tower):
         self.image.fill((0, 0, 0))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.health = 20
+        self.max_health = 20
+        self.health = self.max_health
         self.price = 10
+        self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + self.rect.height * 0.1)
 
 
 class Bomber(Tower):
@@ -110,6 +122,8 @@ class Bomber(Tower):
         self.health = self.max_health
         self.price = 300
         self.range = 10
+        self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + 10)
 
     def update(self, game, sprite_groups):
         self.cooldown -= 1

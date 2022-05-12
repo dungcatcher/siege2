@@ -22,7 +22,7 @@ class Bullet(Projectile):
     def __init__(self, pos, vel):
         super().__init__(pos, vel)
         self.speed = 15
-        self.damage = 1
+        self.damage = 10
 
     def update(self, game, sprite_groups):
         self.pos[0] += self.vel[0] * self.speed
