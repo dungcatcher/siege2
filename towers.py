@@ -13,6 +13,9 @@ class Tower(pygame.sprite.Sprite):
         self.projectiles = []
         self.alive = True
 
+    def draw_health_bar(self, surface):
+        pass
+
     def get_closest_enemy(self, enemy_group):
         current_closest_point, current_closest_enemy = None, None
         shortest_distance = 9999999
@@ -48,7 +51,8 @@ class TownHall(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.health = 100
+        self.max_health = 100
+        self.health = self.max_health
         self.price = 0
 
 
@@ -60,9 +64,10 @@ class GunTower(Tower):
         self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
         self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
         self.positions_covered = self.calculate_positions_covered()
-        self.original_cooldown = 60
+        self.original_cooldown = 5
         self.cooldown = self.original_cooldown
-        self.health = 30
+        self.max_health = 30
+        self.health = self.max_health
         self.price = 225
         self.range = 10
 
@@ -101,7 +106,8 @@ class Bomber(Tower):
         self.positions_covered = self.calculate_positions_covered()
         self.original_cooldown = 80
         self.cooldown = self.original_cooldown
-        self.health = 50
+        self.max_health = 50
+        self.health = self.max_health
         self.price = 300
         self.range = 10
 

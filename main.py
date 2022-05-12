@@ -26,6 +26,16 @@ def generate_map(screen_size, tile_size):
     return map_surface
 
 
+class EntityGroup(pygame.sprite.Group):
+    def draw(self, surface):
+        sprites = self.sprites()
+        surface_blit = surface.blit
+        for spr in sprites:
+            self.spritedict[spr] = surface_blit(spr.image, spr.rect)
+            spr.draw_health_bar(surface)
+        self.lostsprites = []
+
+
 class Game:
     def __init__(self):
         self.money = 1000
@@ -57,8 +67,8 @@ class Game:
         self.round_over = True
         self.finished_spawning = True
         self.sprite_groups = {
-            "towers": pygame.sprite.Group(),
-            "enemies": pygame.sprite.Group(),
+            "towers": EntityGroup(),  # Extended group with health bars
+            "enemies": EntityGroup(),
             "projectiles": pygame.sprite.Group()
         }
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]

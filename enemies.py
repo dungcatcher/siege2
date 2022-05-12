@@ -2,6 +2,7 @@ import pygame
 from pygame import Vector2
 import math
 from astar_python.astar import Astar
+from interpolate import colour_interpolate
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -18,7 +19,8 @@ class Enemy(pygame.sprite.Sprite):
         self.vel = [0, 0]
         self.speed = 0.5
         self.target_index = 1
-        self.health = 10
+        self.max_health = 10
+        self.health = self.max_health
         self.worth = 10
         self.damage = 2
         self.range = 1.5
@@ -26,6 +28,15 @@ class Enemy(pygame.sprite.Sprite):
         self.cooldown = self.original_cooldown
         self.closest_tower = None
         self.closest_tower_point = None
+        self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + 10)
+
+    def draw_health_bar(self, surface):
+        if self.health != self.max_health:
+            health_rect = pygame.Rect(self.health_bar_rect.left, self.health_bar_rect.top,
+                                      (self.health / self.max_health) * self.health_bar_rect.width, self.health_bar_rect.height)
+            pygame.draw.rect(surface, colour_interpolate((0, 255, 0), (255, 0, 0), 1 - (self.health / self.max_health)), health_rect)
+            pygame.draw.rect(surface, (0, 0, 0), self.health_bar_rect, width=1)
 
     def get_closest_tower(self, tower_group, search_walls=False):
         current_closest_point, current_closest_tower = None, None
@@ -129,3 +140,4 @@ class Enemy(pygame.sprite.Sprite):
         self.pixel_position[0] += self.vel[0] * self.speed
         self.pixel_position[1] += self.vel[1] * self.speed
         self.rect.center = self.pixel_position
+        self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + 10)
