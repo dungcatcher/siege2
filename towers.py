@@ -133,7 +133,6 @@ class Wall(Tower):
             if (neighbour_offsets[0][0] == neighbour_offsets[1][0]) or (neighbour_offsets[0][1] == neighbour_offsets[1][1]):
                 angle = math.degrees(math.atan2(-neighbour_offsets[0][1], neighbour_offsets[0][0]))
                 self.image = self.image_map["2_side"]
-                self.image = pygame.transform.rotate(self.image, angle)
             else:
                 angles = []
                 for offset in neighbour_offsets:
@@ -145,14 +144,16 @@ class Wall(Tower):
                     avg_angle = sum(angles) / 2
                     angle = avg_angle - 45
                 self.image = self.image_map["2_side_corner"]
-                self.image = pygame.transform.rotate(self.image, angle)
         elif len(neighbour_offsets) == 3:
             self.image = self.image_map["3_side"]
-            angles = []
-            for offset in neighbour_offsets:
-                angles.append(math.degrees(math.atan2(-offset[1], offset[0])))
-            avg_angle = sum(angles) / 3
-            angle = avg_angle - 90
+            # ew
+            if (-1, 0) in neighbour_offsets and (1, 0) in neighbour_offsets and (0, 1) in neighbour_offsets:
+                angle = 180
+            elif (0, 1) in neighbour_offsets and (0, -1) in neighbour_offsets:
+                if (1, 0) in neighbour_offsets:
+                    angle = 270
+                elif (-1, 0) in neighbour_offsets:
+                    angle = 90
         elif len(neighbour_offsets) == 4:
             self.image = self.image_map["4_side"]
         else:
