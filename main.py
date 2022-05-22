@@ -166,7 +166,8 @@ class Game:
                         self.calculate_obstructions()
                         self.money -= new_tower.price
             else:
-                if self.left_click and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
+                if (self.left_click and not self.bought_tower == "Wall" or pygame.mouse.get_pressed(num_buttons=3)[0]) \
+                        and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
                     tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
                     new_tower = name_to_class[self.bought_tower.name](tile_position, self)
                     if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:

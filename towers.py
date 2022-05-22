@@ -108,7 +108,7 @@ class Wall(Tower):
         self.image = self.image_map["single"]
         self.rect = self.image.get_rect(center=(self.position[0] * game.tile_size + game.tile_size / 2, self.position[1] * game.tile_size + game.tile_size / 2))
         self.positions_covered = self.calculate_positions_covered()
-        self.max_health = 2000000000000000000
+        self.max_health = 20
         self.health = self.max_health
         self.price = 10
         self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
