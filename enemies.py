@@ -58,9 +58,10 @@ class Enemy(pygame.sprite.Sprite):
         self.closest_tower = closest_tower
         self.closest_tower_point = closest_point
         temp_obstructions = obstructions
-        temp_obstructions[closest_point[1]][closest_point[0]] = 0  # Sets the target point to a crossable square
-        astar = Astar(temp_obstructions)
-        if self.position != closest_point:
+        # if closest_point is not None:
+        #     temp_obstructions[closest_point[1]][closest_point[0]] = 0  # Sets the target point to a crossable square
+        #     astar = Astar(temp_obstructions)
+        if self.position != closest_point and closest_point is not None:
             # path = astar.run(self.position, closest_point)
             # if path is not None:
             #     return path

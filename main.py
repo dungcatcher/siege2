@@ -1,4 +1,5 @@
 import pygame
+import pygame.freetype
 from towers import TownHall, name_to_class
 from enemies import Enemy
 from side_menu import SideMenu
@@ -73,6 +74,8 @@ class Game:
         }
         self.obstructions = [[0 for x in range(COLS)] for y in range(ROWS)]
         self.enemy_spawnable_areas = self.calculate_enemy_spawnable_areas()
+        self.result_font = pygame.freetype.SysFont('bahnschrift', 64)
+        self.game_reuslt = None
 
     def calculate_enemy_spawnable_areas(self):
         spawnable_areas = []
@@ -139,7 +142,7 @@ class Game:
                 self.finished_spawning = False
                 self.round_over = False
             else:
-                print('you win')
+                self.game_reuslt = 'You Win!'
 
         if not self.finished_spawning:
             self.spawn_enemies()
@@ -150,7 +153,7 @@ class Game:
         self.side_menu.update(self)
 
         if self.town_hall_destroyed:
-            print('you lose')
+            self.game_reuslt = 'You Lose!'
 
         if self.round_over:
             if not self.town_hall_placed:
@@ -185,6 +188,11 @@ class Game:
         self.sprite_groups["enemies"].draw(surface)
         self.sprite_groups["projectiles"].draw(surface)
         self.side_menu.render(self, surface)
+
+        if self.game_reuslt is not None:
+            game_result_surface, game_result_rect = self.result_font.render(self.game_reuslt, (255, 255, 255))
+            game_result_rect.center = self.map_rect.center
+            WINDOW.blit(game_result_surface, game_result_rect)
 
 
 def main():
