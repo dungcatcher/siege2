@@ -6,7 +6,7 @@ from interpolate import colour_interpolate
 
 
 class Tower(pygame.sprite.Sprite):
-    def __init__(self, position, tile_size):
+    def __init__(self, position, game):
         super().__init__()
         self.position = position  # Top left tile
         self.is_town_hall = False
@@ -48,13 +48,13 @@ class Tower(pygame.sprite.Sprite):
 
 
 class TownHall(Tower):
-    def __init__(self, position, tile_size):
-        super().__init__(position, tile_size)
+    def __init__(self, position, game):
+        super().__init__(position, game)
         self.is_town_hall = True
         self.size = (5, 5)  # Size in tiles
         self.image = pygame.image.load('Assets/townhall.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
-        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.image = pygame.transform.scale(self.image, (self.size[0] * game.tile_size, self.size[1] * game.tile_size))
+        self.rect = self.image.get_rect(topleft=(self.position[0] * game.tile_size, self.position[1] * game.tile_size))
         self.positions_covered = self.calculate_positions_covered()
         self.max_health = 100
         self.health = self.max_health
@@ -64,12 +64,12 @@ class TownHall(Tower):
 
 
 class GunTower(Tower):
-    def __init__(self, position, tile_size):
-        super().__init__(position, tile_size)
+    def __init__(self, position, game):
+        super().__init__(position, game)
         self.size = (3, 3)
         self.image = pygame.image.load('Assets/guntower.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
-        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.image = pygame.transform.scale(self.image, (self.size[0] * game.tile_size, self.size[1] * game.tile_size))
+        self.rect = self.image.get_rect(topleft=(self.position[0] * game.tile_size, self.position[1] * game.tile_size))
         self.positions_covered = self.calculate_positions_covered()
         self.original_cooldown = 60
         self.cooldown = self.original_cooldown
@@ -93,28 +93,82 @@ class GunTower(Tower):
 
 
 class Wall(Tower):
-    def __init__(self, position, tile_size):
-        super().__init__(position, tile_size)
+    def __init__(self, position, game):
+        super().__init__(position, game)
         self.is_wall = True
         self.size = (1, 1)
-        self.image = pygame.Surface((self.size[0] * tile_size, self.size[1] * tile_size))
-        self.image.fill((0, 0, 0))
-        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.image_map = {
+            "single": pygame.transform.scale(pygame.image.load('./Assets/single_wall.png'), (game.tile_size, game.tile_size)).convert_alpha(),
+            "1_side": pygame.transform.scale(pygame.image.load('./Assets/wall_1_side.png'), (game.tile_size, game.tile_size)).convert_alpha(),
+            "2_side": pygame.transform.scale(pygame.image.load('./Assets/wall_2_side.png'), (game.tile_size, game.tile_size)).convert_alpha(),
+            "2_side_corner": pygame.transform.scale(pygame.image.load('./Assets/wall_2_side_corner.png'), (game.tile_size, game.tile_size)).convert_alpha(),
+            "3_side": pygame.transform.scale(pygame.image.load('./Assets/wall_3_side.png'), (game.tile_size, game.tile_size)).convert_alpha(),
+            "4_side": pygame.transform.scale(pygame.image.load('./Assets/wall_4_side.png'), (game.tile_size, game.tile_size)).convert_alpha()
+        }
+        self.image = self.image_map["single"]
+        self.rect = self.image.get_rect(center=(self.position[0] * game.tile_size + game.tile_size / 2, self.position[1] * game.tile_size + game.tile_size / 2))
         self.positions_covered = self.calculate_positions_covered()
-        self.max_health = 20
+        self.max_health = 2000000000000000000
         self.health = self.max_health
         self.price = 10
         self.health_bar_rect = pygame.Rect(0, 0, self.rect.width * 0.85, self.rect.height * 0.25)
         self.health_bar_rect.midtop = (self.rect.centerx, self.rect.bottom + self.rect.height * 0.1)
 
+    def update_image(self, game):  # Change image based on neighbouring walls
+        neighbour_offsets = []
+
+        side_offsets = [(-1, 0), (1, 0), (0, 1), (0, -1)]
+        for offset in side_offsets:
+            test_position = (self.position[0] + offset[0], self.position[1] + offset[1])
+            if 1 <= test_position[0] <= 43 and 1 <= test_position[1] <= 43:
+                for tower in game.sprite_groups["towers"]:
+                    if tower.is_wall and tower.position == test_position and tower.position != self.position:
+                        neighbour_offsets.append(offset)
+
+        angle = 0
+        if len(neighbour_offsets) == 1:
+            angle = math.degrees(math.atan2(-neighbour_offsets[0][1], neighbour_offsets[0][0]))
+            self.image = self.image_map["1_side"]
+        elif len(neighbour_offsets) == 2:
+            if (neighbour_offsets[0][0] == neighbour_offsets[1][0]) or (neighbour_offsets[0][1] == neighbour_offsets[1][1]):
+                angle = math.degrees(math.atan2(-neighbour_offsets[0][1], neighbour_offsets[0][0]))
+                self.image = self.image_map["2_side"]
+                self.image = pygame.transform.rotate(self.image, angle)
+            else:
+                angles = []
+                for offset in neighbour_offsets:
+                    angles.append(math.degrees(math.atan2(-offset[1], offset[0])) % 360)
+
+                if angles == [270, 0] or angles == [0, 270]:
+                    angle = 270
+                else:
+                    avg_angle = sum(angles) / 2
+                    angle = avg_angle - 45
+                self.image = self.image_map["2_side_corner"]
+                self.image = pygame.transform.rotate(self.image, angle)
+        elif len(neighbour_offsets) == 3:
+            self.image = self.image_map["3_side"]
+            angles = []
+            for offset in neighbour_offsets:
+                angles.append(math.degrees(math.atan2(-offset[1], offset[0])))
+            avg_angle = sum(angles) / 3
+            angle = avg_angle - 90
+        elif len(neighbour_offsets) == 4:
+            self.image = self.image_map["4_side"]
+        else:
+            self.image = self.image_map["single"]
+
+        self.image = pygame.transform.rotate(self.image, angle)
+        self.rect = self.image.get_rect(center=(self.position[0] * game.tile_size + game.tile_size / 2, self.position[1] * game.tile_size + game.tile_size / 2))
+
 
 class Bomber(Tower):
-    def __init__(self, position, tile_size):
-        super().__init__(position, tile_size)
+    def __init__(self, position, game):
+        super().__init__(position, game)
         self.size = (3, 3)
         self.image = pygame.image.load('Assets/bomber.png').convert_alpha()
-        self.image = pygame.transform.scale(self.image, (self.size[0] * tile_size, self.size[1] * tile_size))
-        self.rect = self.image.get_rect(topleft=(self.position[0] * tile_size, self.position[1] * tile_size))
+        self.image = pygame.transform.scale(self.image, (self.size[0] * game.tile_size, self.size[1] * game.tile_size))
+        self.rect = self.image.get_rect(topleft=(self.position[0] * game.tile_size, self.position[1] * game.tile_size))
         self.positions_covered = self.calculate_positions_covered()
         self.original_cooldown = 80
         self.cooldown = self.original_cooldown

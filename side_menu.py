@@ -7,20 +7,16 @@ bahnschrift = pygame.freetype.SysFont('bahnschrift', 16)
 
 name_to_image_name = {
     "Gun Tower": "guntower",
-    "Bomber": "bomber"
+    "Bomber": "bomber",
+    "Wall": "single_wall"
 }
 
 
 class MenuItem:
     def __init__(self, pos, size, name):
-        if name != "Wall":
-            self.image = pygame.image.load(f'Assets/{name_to_image_name[name]}.png').convert_alpha()
-            self.image = pygame.transform.scale(self.image, (size, size))
-            self.rect = self.image.get_rect(center=(pos[0], pos[1]))
-        else:
-            self.image = pygame.Surface((size, size))
-            self.image.fill((255, 0, 0))
-            self.rect = self.image.get_rect(center=(pos[0], pos[1]))
+        self.image = pygame.image.load(f'Assets/{name_to_image_name[name]}.png').convert_alpha()
+        self.image = pygame.transform.scale(self.image, (size, size))
+        self.rect = self.image.get_rect(center=(pos[0], pos[1]))
         self.name = name
 
     def mouse_over(self, mouse_position):

@@ -3,6 +3,7 @@ from pygame import Vector2
 import math
 from astar_python.astar import Astar
 from interpolate import colour_interpolate
+import random
 
 
 class Enemy(pygame.sprite.Sprite):
@@ -17,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.wall_obstructions = []
         self.path_searched = False
         self.vel = [0, 0]
-        self.speed = 0.5
+        self.speed = random.randint(5, 10) / 10
         self.target_index = 1
         self.max_health = 10
         self.health = self.max_health
@@ -89,6 +90,7 @@ class Enemy(pygame.sprite.Sprite):
                 self.path_searched = False
                 if tower.is_town_hall:
                     game.town_hall_destroyed = True
+                game.calculate_obstructions()
 
     def update(self, game):
         if not self.path_searched and game.sprite_groups["towers"]:

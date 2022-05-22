@@ -156,18 +156,24 @@ class Game:
             if not self.town_hall_placed:
                 if self.left_click and self.map_rect.collidepoint(self.mouse_position):
                     tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
-                    new_tower = TownHall(tile_position, self.tile_size)
+                    new_tower = TownHall(tile_position, self)
                     if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
                         self.sprite_groups["towers"].add(new_tower)
+                        for tower in self.sprite_groups["towers"]:
+                            if tower.is_wall:
+                                tower.update_image(self)
                         self.town_hall_placed = True
                         self.calculate_obstructions()
                         self.money -= new_tower.price
             else:
                 if self.left_click and self.map_rect.collidepoint(self.mouse_position) and self.bought_tower is not None:
                     tile_position = (self.mouse_position[0] // self.tile_size, self.mouse_position[1] // self.tile_size)
-                    new_tower = name_to_class[self.bought_tower.name](tile_position, self.tile_size)
+                    new_tower = name_to_class[self.bought_tower.name](tile_position, self)
                     if self.check_placement_availability(new_tower) and self.money - new_tower.price >= 0:
                         self.sprite_groups["towers"].add(new_tower)
+                        for tower in self.sprite_groups["towers"]:
+                            if tower.is_wall:
+                                tower.update_image(self)
                         self.calculate_obstructions()
                         self.money -= new_tower.price
 
